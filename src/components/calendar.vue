@@ -1,6 +1,9 @@
 <template>
     <div id="calendar-control">
         <div id="calendar-header">
+            <div class="hello-msg">
+                亲, <span ref="noon" title="">{{options.noon}}</span>好
+            </div>
             <div class="current-time">
                 <span ref="year" title="滚动鼠标滚轮调整年份">{{options.fullyear}}</span> 年
                 <span ref="month" title="滚动鼠标滚轮调整月份">{{options.month}}</span> 月
@@ -11,25 +14,30 @@
                 <a href="JavasSript:;" class="today">今天</a>
                 <a href="javascript:location.reload();" class="refresh">刷新</a>
             </div>
-            <ul id="calendar-format">
+            <ul class="calendar-format">
                 <li :class="options.type == 'week'? 'active':''">列表</li>
                 <li :class="options.type == 'month'? 'active':''">月历</li>
                 <li :class="options.type == 'list'? 'active':''">周历</li>
             </ul>
         </div>
-        <table cellspacing="0" cellpadding="0" width="100%" height="38" class="js_tb_head">
-            <tbody>
-                <tr class="calendar_th">
-                    <th height="38">周一</th>
-                    <th>周二</th>
-                    <th>周三</th>
-                    <th>周四</th>
-                    <th>周五</th>
-                    <th class="weekend">周六</th>
-                    <th class="weekend">周日</th>
-                </tr>
-            </tbody>
-        </table>
+        <div id="calendar-content">
+            <ul class="table-header">
+                <template v-for="tabTitle, index in days">
+                    <li class="work" v-if="index != 5 && index != 6"> <span>周{{tabTitle}}</span> </li>
+                    <li class="rest" v-else> <span>周{{tabTitle}}</span> </li>
+                </template>
+            </ul>
+            <ul class="table-content">
+                <template v-for="tab, index in dataList" v-if="dataList.length > 0">
+                    <li>
+                        <dl>
+                            <dt>{{tab}}</dt>
+                            <dd></dd>
+                        </dl>
+                    </li>
+                </template>
+            </ul>
+        </div>
     </div>
 </template>
 <script>
@@ -39,28 +47,24 @@ export default {
         return {
             newDate: new Date(),
             options: {
-                noon: 'afternoon', // forenoon[上午], afternoon[下午]
-                fullyear: new Date().getFullYear(),
-                month: new Date().getMonth() + 1,
-                day: new Date().getDate(),
-                year: new Date().getYear(), //获取当前年份(2位)
-                date: new Date().getDate(), //获取当前日(1-31)
-                day: new Date().getDay(), //获取当前星期X(0-6,0代表星期天)
-                time: new Date().getTime(), //获取当前时间(从1970.1.1开始的毫秒数)
-                hours: new Date().getHours(), //获取当前小时数(0-23)
-                minutes: new Date().getMinutes(), //获取当前分钟数(0-59)
-                seconds: new Date().getSeconds(), //获取当前秒数(0-59)
-                milliseconds: new Date().getMilliseconds(), //获取当前毫秒数(0-999)
-                toLocaleDateString: new Date().toLocaleDateString(), //获取当前日期
-                time: new Date().toLocaleTimeString(), //获取当前时间
-                timeStr: new Date().toLocaleString(), //获取日期与时间
+                noon: '', // forenoon[上午], afternoon[下午]
+                month: new Date().getMonth() + 1, // 获取当前月份(2位)
+                year: new Date().getFullYear(), // 获取当前年份(4位)
+                date: new Date().getDate(), // 获取当前日(1-31)
+                day: new Date().getDay(), // 获取当前星期X(0-6,0代表星期天)
+                time: new Date().getTime(), // 获取当前时间(从1970.1.1开始的毫秒数)
+                hours: new Date().getHours(), // 获取当前小时数(0-23)
+                minutes: new Date().getMinutes(), // 获取当前分钟数(0-59)
+                seconds: new Date().getSeconds(), // 获取当前秒数(0-59)
+                milliseconds: new Date().getMilliseconds(), // 获取当前毫秒数(0-999)
+                toLocaleDateString: new Date().toLocaleDateString(), // 获取当前日期
+                time: new Date().toLocaleTimeString(), // 获取当前时间
+                timeStr: new Date().toLocaleString(), // 获取日期与时间
                 type: 'month', // week[周], month[月], list[列表]
                 oneday: 'monday', // monday[一], sunday[日]
             },
             currentTime: null, // 当前时间
-            fullDate: {
-
-            },
+            fullDate: {},
             userData: {},
             months: ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'],
             days: ['一', '二', '三', '四', '五', '六', '日'],
@@ -72,11 +76,15 @@ export default {
     watch: {},
     props: {},
     beforeCreate() {},
-    created() {},
+    created() {
+        this.options.noon = this.options.time.slice(0, 2);
+    },
     beforeMount() {},
     mounted() {
-        console.log(this.options);
-        this.$nextTick(function() {});
+        console.log(this.options, new Date().toSource);
+        this.$nextTick(function() {
+            this.initData(2000, 10);
+        });
     },
     beforeUpdate() {
         // console.group('更新前状态  ===============》beforeUpdate');
@@ -91,8 +99,135 @@ export default {
         // console.group('销毁完成状态===============》destroyed');
     },
     methods: {
-        initData: function() {
+        initData: function(year, month, date) {
+            if (year == null) { year = this.options.year; }
+            if (month == null) { month = this.options.month; }
+            if (date == null) { date = this.options.date; }
+            // console.log(year, month, date);
+            let showYear = year + '年';
+            let showMonth = this.months[month - 1] + '月';
 
+            // 计算本月1号是周几；
+            let week = new Date(year + '-' + month + '-1').getDay();
+
+            // 计算本月有多少天；
+            let days = new Date(year, month, 0).getDate();
+
+            // 计算上月有多少天；
+            let dayw = new Date(year, month - 1, 0).getDate();
+
+            // console.log(week, days, dayw);
+            console.log(showYear, showMonth);
+
+            //将日历填回页面；拿出节假日
+            for (let i = 1; i <= days; i++) {
+                let _data = {
+                    day: null, // 阳历
+                    week: null, // 周几
+                    lunar: null, // 农历
+                    fest: null, // 节日
+                    solar: null, // 节气
+                    work: []
+                };
+                _data.day = i;
+                let week = new Date(year, month - 1, i).getDay();
+                switch (week) {
+                    case 1:
+                        _data.week = '周一';
+                        break;
+                    case 2:
+                        _data.week = '周二';
+                        break;
+                    case 3:
+                        _data.week = '周三';
+                        break;
+                    case 4:
+                        _data.week = '周四';
+                        break;
+                    case 5:
+                        _data.week = '周五';
+                        break;
+                    case 6:
+                        _data.week = '周六';
+                        break;
+                    case 0:
+                        _data.week = '周日';
+                        break;
+                }
+                switch (parseInt(month)) {
+                    case 1:
+                        if (i == 10) { _data.fest = '教师节'; }
+                        break;
+                    case 2:
+                        if (i == 10) { _data.fest = '教师节'; }
+                        break;
+                    case 3:
+                        if (i == 8) { _data.fest = '妇女节'; }
+                        if (i == 12) { _data.fest = '植树节'; }
+                        break;
+                    case 4:
+                        if (i == 5) { _data.fest = '清明节'; }
+                        break;
+                    case 5:
+                        if (i == 1) { _data.fest = '劳动节'; }
+                        break;
+                    case 6:
+                        if (i == 1) { _data.fest = '儿童节'; }
+                        break;
+                    case 7:
+                        if (i == 1) { _data.fest = '中国共产党诞生纪念日'; }
+                        // if (i == 7) { _data.fest = '七夕节'; }
+                        break;
+                    case 8:
+                        if (i == 1) { _data.fest = '建军节'; }
+                        break;
+                    case 9:
+                        // if (i == 10) { _data.fest = '教师节'; }
+                        break;
+                    case 10:
+                        if (i == 1) { _data.fest = '国庆节'; }
+                        if (i == 17) { _data.fest = '重阳节'; }
+                        break;
+                    case 11:
+                        if (i == 11) { _data.fest = '光棍节'; }
+                        break;
+                    case 12:
+                        // if (i == 10) { _data.fest = '教师节'; }
+                        break;
+                }
+                this.dataList.push(_data);
+                // var time = new Date(year, month, i).getTime();
+                // if (month + '-' + i == '1-1') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>元旦</i></li>"
+                // } else if (month + '-' + i == '2-14') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>情人节</i></li>"
+                // } else if (month + '-' + i == '3-8') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>妇女节</i></li>"
+                // } else if (month + '-' + i == '4-1') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>愚人节</i></li>"
+                // } else if (month + '-' + i == '5-1') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>劳动节</i></li>"
+                // } else if (month + '-' + i == '6-1') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>儿童节</i></li>"
+                // } else if (month + '-' + i == '7-1') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>建党节</i></li>"
+                // } else if (month + '-' + i == '8-1') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>建军节</i></li>"
+                // } else if (month + '-' + i == '9-10') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>教师节</i></li>"
+                // } else if (month + '-' + i == '10-1') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>国庆节</i></li>"
+                // } else if (month + '-' + i == '11-11') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>光棍节</i></li>"
+                // } else if (month + '-' + i == '12-24') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>平安夜</i></li>"
+                // } else if (month + '-' + i == '12-25') {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>圣诞节</i></li>"
+                // } else {
+                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span></li>"
+                // }
+            }
+            // $('.date ul').html(html);
         },
     }
 }
@@ -100,102 +235,6 @@ export default {
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#calendar-control {
-    width: auto;
-    margin: 0 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-#calendar-control * {
-    box-sizing: border-box;
-}
-
-#calendar-control a {
-    text-decoration: none;
-}
-
-#calendar-header {
-    height: 40px;
-    line-height: 40px;
-    background-color: #00bff3;
-    border-bottom: 2px solid #00acda;
-    color: white;
-    text-align: left;
-    border-radius: 5px 5px 0 0;
-}
-
-.current-time {
-    margin: 0 15px;
-    display: inline-block;
-}
-
-.sys-time-btn {
-    display: inline-block;
-}
-
-.sys-time-btn a {
-    height: 24px;
-    line-height: 24px;
-    padding: 0 10px;
-    margin-left: 10px;
-    border: 1px solid #d0d0d0;
-    border-radius: 4px;
-    font-size: 11px;
-    display: inline-block;
-    color: rgba(255, 255, 255, .8);
-    background-color: rgba(255, 255, 255, .2);
-}
-
-.sys-time-btn a:hover {
-    color: #48ffff;
-}
-
-
-#calendar-format {
-    float: right;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    height: 30px;
-    line-height: 30px;
-    width: auto;
-    margin: 5px 15px;
-    border: 1px solid #d0d0d0;
-    background: rgba(0, 0, 0, .3);
-    border-radius: 5px;
-}
-
-#calendar-format li {
-    float: left;
-    padding: 0 10px;
-    cursor: pointer;
-    font-size: 11px;
-    height: 100%;
-    color: rgba(255, 255, 255, .7);
-}
-
-#calendar-format li:first-child {
-    border-radius: 5px 0 0 5px;
-}
-
-#calendar-format li:last-child {
-    border-radius: 0 5px 5px 0;
-}
-
-#calendar-format li.active {
-    background-color: #00b0f0;
-    color: white;
-}
-
-#calendar-format li:hover {
-    color: #00bff3;
-}
-
-#calendar-format li~li {
-    margin-left: 5px;
-}
-
-#calendar-format {}
+@import 'calendar.css'
 
 </style>
