@@ -22,7 +22,7 @@
         </div>
         <div id="calendar-content">
             <ul class="table-header">
-                <template v-for="tabTitle, index in days">
+                <template v-for="tabTitle, index in weeks">
                     <li class="work" v-if="index != 5 && index != 6"> <span>周{{tabTitle}}</span> </li>
                     <li class="rest" v-else> <span>周{{tabTitle}}</span> </li>
                 </template>
@@ -31,7 +31,12 @@
                 <template v-for="tab, index in dataList" v-if="dataList.length > 0">
                     <li>
                         <dl>
-                            <dt>{{tab}}</dt>
+                            <dt>
+                                {{tab}}
+                                <!-- {{tab.day}}
+                                {{tab.lunar}}
+                                {{tab.fest}} -->
+                            </dt>
                             <dd></dd>
                         </dl>
                     </li>
@@ -45,7 +50,8 @@ export default {
     name: 'calendar',
     data() {
         return {
-            newDate: new Date(),
+            currentDate: new Date(), // 当前时间对象
+            currentTime: null, // 当前时间
             options: {
                 noon: '', // forenoon[上午], afternoon[下午]
                 month: new Date().getMonth() + 1, // 获取当前月份(2位)
@@ -63,13 +69,91 @@ export default {
                 type: 'month', // week[周], month[月], list[列表]
                 oneday: 'monday', // monday[一], sunday[日]
             },
-            currentTime: null, // 当前时间
             fullDate: {},
             userData: {},
+            // 月份数组
             months: ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'],
-            days: ['一', '二', '三', '四', '五', '六', '日'],
-            nums: ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十', '二十一', '二十二', '二十三', '二十四', '二十五', '二十六', '二十七', '二十八', '二十九', '三十', '三十一', '三十二'],
-            solar: ['0105小寒', '0120大寒', '0203立春', '0218雨水', '0305惊蜇', '0320春分', '0404清明', '0419谷雨', '0505立夏', '0520小满', '0605芒种', '0621夏至', '0706小暑', '0722大暑', '0807立秋', '0822处暑', '0907白露', '0922秋分', '1008寒露', '1023霜降', '1107立冬', '1122小雪', '1206大雪', '1221冬至'],
+            // 日期数组
+            days: ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十', '二十一', '二十二', '二十三', '二十四', '二十五', '二十六', '二十七', '二十八', '二十九', '三十', '三十一', '三十二'],
+            // 星期数组
+            weeks: ['一', '二', '三', '四', '五', '六', '日'],
+            // 传统节日
+            festival: [
+                { month: 1, day: 1, name: "元旦" },
+                { month: 2, day: 2, name: "世界湿地日" },
+                { month: 2, day: 14, name: "情人节" },
+                { month: 3, day: 3, name: "全国爱耳日" },
+                { month: 3, day: 5, name: "青年志愿者服务日" },
+                { month: 3, day: 8, name: "国际妇女节" },
+                { month: 3, day: 9, name: "保护母亲河日" },
+                { month: 3, day: 12, name: "中国植树节" },
+                { month: 3, day: 14, name: "白色情人节" },
+                { month: 3, day: 15, name: "世界消费者权益日" },
+                { month: 3, day: 21, name: "世界森林日" },
+                { month: 3, day: 22, name: "世界水日" },
+                { month: 3, day: 23, name: "世界气象日" },
+                { month: 3, day: 24, name: "世界防治结核病日" },
+                { month: 4, day: 1, name: "愚人节" },
+                { month: 4, day: 7, name: "世界卫生日" },
+                { month: 4, day: 22, name: "世界地球日" },
+                { month: 4, day: 26, name: "世界知识产权日" },
+                { month: 5, day: 1, name: "国际劳动节" },
+                { month: 5, day: 3, name: "世界哮喘日" },
+                { month: 5, day: 4, name: "中国青年节" },
+                { month: 5, day: 8, name: "世界红十字日" },
+                { month: 5, day: 12, name: "国际护士节" },
+                { month: 5, day: 15, name: "国际家庭日" },
+                { month: 5, day: 17, name: "世界电信日" },
+                { month: 5, day: 20, name: "全国学生营养日" },
+                { month: 5, day: 23, name: "国际牛奶日" },
+                { month: 5, day: 31, name: " 世界无烟日" },
+                { month: 6, day: 1, name: " 国际儿童节" },
+                { month: 6, day: 5, name: "世界环境日" },
+                { month: 6, day: 6, name: "全国爱眼日" },
+                { month: 6, day: 17, name: "世界防治荒漠化和干旱日" },
+                { month: 6, day: 23, name: "国际奥林匹克日" },
+                { month: 6, day: 25, name: "全国土地日" },
+                { month: 6, day: 26, name: "国际禁毒日" },
+                { month: 7, day: 1, name: "中国共产党诞生日" },
+                { month: 7, day: 7, name: "中国人民抗日战争纪念日" },
+                { month: 7, day: 11, name: "世界人口日" },
+                { month: 8, day: 1, name: "中国人民解放军建军节" },
+                { month: 8, day: 12, name: "国际青年节" },
+                { month: 9, day: 8, name: "国际扫盲日" },
+                { month: 9, day: 10, name: "中国教师节" },
+                { month: 9, day: 16, name: "中国脑健康日" },
+                { month: 9, day: 20, name: "全国爱牙日" },
+                { month: 9, day: 21, name: "世界停火日" },
+                { month: 9, day: 27, name: "世界旅游日" },
+                { month: 10, day: 1, name: "中华人民共和国国庆节" },
+                { month: 10, day: 4, name: "世界动物日" },
+                { month: 10, day: 5, name: "世界教师日" },
+                { month: 10, day: 8, name: "全国高血压日" },
+                { month: 10, day: 9, name: "世界邮政日" },
+                { month: 10, day: 10, name: "世界精神卫生日" },
+                { month: 10, day: 14, name: "世界标准日" },
+                { month: 10, day: 15, name: "国际盲人节" },
+                { month: 10, day: 16, name: "世界粮食日" },
+                { month: 10, day: 17, name: "国际消除贫困日" },
+                { month: 10, day: 24, name: "联合国日" },
+                { month: 10, day: 28, name: "中国男性健康日" },
+                { month: 10, day: 29, name: "国际生物多样性日" },
+                { month: 10, day: 31, name: "万圣节" },
+                { month: 11, day: 8, name: "中国记者节" },
+                { month: 11, day: 9, name: "消防宣传日" },
+                { month: 11, day: 14, name: "世界糖尿病日" },
+                { month: 11, day: 17, name: "国际大学生节" },
+                { month: 11, day: 25, name: "国际消除对妇女的暴力日" },
+                { month: 12, day: 1, name: "世界爱滋病日" },
+                { month: 12, day: 3, name: "世界残疾人日" },
+                { month: 12, day: 4, name: "全国法制宣传日" },
+                { month: 12, day: 9, name: "世界足球日" },
+                { month: 12, day: 25, name: "圣诞节" },
+                { month: 12, day: 29, name: "国际生物多样性日" }
+            ],
+            // 24节气
+            solar: ['小寒', '大寒', '立春', '雨水', '惊蜇', '春分', '清明', '谷雨', '立夏', '小满', '芒种', '夏至', '小暑', '大暑', '立秋', '处暑', '白露', '秋分', '寒露', '霜降', '立冬', '小雪', '大雪', '冬至'],
+            // 显示数据
             dataList: [],
         }
     },
@@ -81,9 +165,8 @@ export default {
     },
     beforeMount() {},
     mounted() {
-        console.log(this.options, new Date().toSource);
         this.$nextTick(function() {
-            this.initData(2000, 10);
+            this._initData();
         });
     },
     beforeUpdate() {
@@ -99,135 +182,93 @@ export default {
         // console.group('销毁完成状态===============》destroyed');
     },
     methods: {
-        initData: function(year, month, date) {
+        _initData: function(year, month, date) {
             if (year == null) { year = this.options.year; }
             if (month == null) { month = this.options.month; }
             if (date == null) { date = this.options.date; }
+            // console.log(this.months, this.days);
             // console.log(year, month, date);
             let showYear = year + '年';
             let showMonth = this.months[month - 1] + '月';
+            let showDay = this.days[date - 1] + '日';
+            // console.log(year, month, date);
+            // console.log(showYear, showMonth, showDay);
 
             // 计算本月1号是周几；
-            let week = new Date(year + '-' + month + '-1').getDay();
+            // let week = new Date(year + '-' + month + '-1').getDay();
 
             // 计算本月有多少天；
             let days = new Date(year, month, 0).getDate();
 
             // 计算上月有多少天；
-            let dayw = new Date(year, month - 1, 0).getDate();
-
+            // let dayw = new Date(year, month - 1, 0).getDate();
             // console.log(week, days, dayw);
-            console.log(showYear, showMonth);
 
-            //将日历填回页面；拿出节假日
-            for (let i = 1; i <= days; i++) {
+            var _temp = []; // 零时数据
+            // 构建当月数据
+            for (var i = 1; i <= days; i++) {
                 let _data = {
                     day: null, // 阳历
                     week: null, // 周几
-                    lunar: null, // 农历
                     fest: null, // 节日
+                    lunar: null, // 农历
                     solar: null, // 节气
                     work: []
                 };
-                _data.day = i;
-                let week = new Date(year, month - 1, i).getDay();
-                switch (week) {
-                    case 1:
-                        _data.week = '周一';
-                        break;
-                    case 2:
-                        _data.week = '周二';
-                        break;
-                    case 3:
-                        _data.week = '周三';
-                        break;
-                    case 4:
-                        _data.week = '周四';
-                        break;
-                    case 5:
-                        _data.week = '周五';
-                        break;
-                    case 6:
-                        _data.week = '周六';
-                        break;
-                    case 0:
-                        _data.week = '周日';
-                        break;
-                }
-                switch (parseInt(month)) {
-                    case 1:
-                        if (i == 10) { _data.fest = '教师节'; }
-                        break;
-                    case 2:
-                        if (i == 10) { _data.fest = '教师节'; }
-                        break;
-                    case 3:
-                        if (i == 8) { _data.fest = '妇女节'; }
-                        if (i == 12) { _data.fest = '植树节'; }
-                        break;
-                    case 4:
-                        if (i == 5) { _data.fest = '清明节'; }
-                        break;
-                    case 5:
-                        if (i == 1) { _data.fest = '劳动节'; }
-                        break;
-                    case 6:
-                        if (i == 1) { _data.fest = '儿童节'; }
-                        break;
-                    case 7:
-                        if (i == 1) { _data.fest = '中国共产党诞生纪念日'; }
-                        // if (i == 7) { _data.fest = '七夕节'; }
-                        break;
-                    case 8:
-                        if (i == 1) { _data.fest = '建军节'; }
-                        break;
-                    case 9:
-                        // if (i == 10) { _data.fest = '教师节'; }
-                        break;
-                    case 10:
-                        if (i == 1) { _data.fest = '国庆节'; }
-                        if (i == 17) { _data.fest = '重阳节'; }
-                        break;
-                    case 11:
-                        if (i == 11) { _data.fest = '光棍节'; }
-                        break;
-                    case 12:
-                        // if (i == 10) { _data.fest = '教师节'; }
-                        break;
-                }
-                this.dataList.push(_data);
-                // var time = new Date(year, month, i).getTime();
-                // if (month + '-' + i == '1-1') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>元旦</i></li>"
-                // } else if (month + '-' + i == '2-14') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>情人节</i></li>"
-                // } else if (month + '-' + i == '3-8') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>妇女节</i></li>"
-                // } else if (month + '-' + i == '4-1') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>愚人节</i></li>"
-                // } else if (month + '-' + i == '5-1') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>劳动节</i></li>"
-                // } else if (month + '-' + i == '6-1') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>儿童节</i></li>"
-                // } else if (month + '-' + i == '7-1') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>建党节</i></li>"
-                // } else if (month + '-' + i == '8-1') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>建军节</i></li>"
-                // } else if (month + '-' + i == '9-10') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>教师节</i></li>"
-                // } else if (month + '-' + i == '10-1') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>国庆节</i></li>"
-                // } else if (month + '-' + i == '11-11') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>光棍节</i></li>"
-                // } else if (month + '-' + i == '12-24') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>平安夜</i></li>"
-                // } else if (month + '-' + i == '12-25') {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span><i>圣诞节</i></li>"
-                // } else {
-                //     html += "<li data-jr=" + month + "-" + i + " data-id=" + time + " data-date=" + year + "-" + month + "-" + i + "><span>" + i + "</span></li>"
-                // }
+                _data = this._getDayWeek(_data, year, month, i);                
+                // _data = this._getDayFest(_data, year, month, i);
+                _temp.push(_data);
             }
-            // $('.date ul').html(html);
+            this.dataList =_temp; // 复制, 渲染
+            // console.log(this.dataList);
+        },
+        // 获得当前时间: 阳历, 周几
+        _getDayWeek: function(D, Y, M, R) {
+            let RES = null;
+            D.day = R;
+            D.lunar = this.days[R >=20 ? R-20:R+5];
+            let W = new Date(Y, M - 1, R).getDay();
+            switch (W) {
+                case 1:
+                    D.week = '周一';
+                    break;
+                case 2:
+                    D.week = '周二';
+                    break;
+                case 3:
+                    D.week = '周三';
+                    break;
+                case 4:
+                    D.week = '周四';
+                    break;
+                case 5:
+                    D.week = '周五';
+                    break;
+                case 6:
+                    D.week = '周六';
+                    break;
+                case 0:
+                    D.week = '周日';
+                    break;
+            }
+            for (let i = 0; i < this.festival.length; i++) {
+                if (this.festival[i].month == M && this.festival[i].day == R) {
+                    D.fest = this.festival[i].name;
+                }
+            }
+            RES = D;
+            // D = this._getDayFest(D, Y, M, R);
+            console.log(D);
+            return RES;
+        },
+        // 获取当前时间: 传统节日
+        _getDayFest: function(D, Y, M, R) {
+            for (let i = 0; i < this.festival.length; i++) {
+                if (this.festival[i].month == M && this.festival[i].day) {
+                    D.fest = this.festival[i].name;
+                }
+            }
+            return D;
         },
     }
 }
