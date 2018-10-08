@@ -32,12 +32,17 @@
                     <li>
                         <dl>
                             <dt>
-                                {{tab}}
-                                <!-- {{tab.day}}
-                                {{tab.lunar}}
-                                {{tab.fest}} -->
+                                <template v-if="tab.fest == null ">
+                                    <span class="lunar">{{tab.lunar}}</span>
+                                </template>
+                                <template v-else>
+                                    <span class="fest" :title="tab.fest">{{tab.fest}}</span>
+                                </template>
+                                <span class="day">{{tab.day}}</span>
                             </dt>
-                            <dd></dd>
+                            <dd>
+                                <!-- {{tab}} -->
+                            </dd>
                         </dl>
                     </li>
                 </template>
@@ -193,17 +198,13 @@ export default {
             let showDay = this.days[date - 1] + '日';
             // console.log(year, month, date);
             // console.log(showYear, showMonth, showDay);
-
             // 计算本月1号是周几；
             // let week = new Date(year + '-' + month + '-1').getDay();
-
             // 计算本月有多少天；
             let days = new Date(year, month, 0).getDate();
-
             // 计算上月有多少天；
             // let dayw = new Date(year, month - 1, 0).getDate();
             // console.log(week, days, dayw);
-
             var _temp = []; // 零时数据
             // 构建当月数据
             for (var i = 1; i <= days; i++) {
@@ -215,18 +216,18 @@ export default {
                     solar: null, // 节气
                     work: []
                 };
-                _data = this._getDayWeek(_data, year, month, i);                
+                _data = this._getDayWeek(_data, year, month, i);
                 // _data = this._getDayFest(_data, year, month, i);
                 _temp.push(_data);
             }
-            this.dataList =_temp; // 复制, 渲染
+            this.dataList = _temp; // 复制, 渲染
             // console.log(this.dataList);
         },
         // 获得当前时间: 阳历, 周几
         _getDayWeek: function(D, Y, M, R) {
             let RES = null;
             D.day = R;
-            D.lunar = this.days[R >=20 ? R-20:R+5];
+            D.lunar = this.days[R >= 20 ? R - 20 : R + 5];
             let W = new Date(Y, M - 1, R).getDay();
             switch (W) {
                 case 1:
