@@ -23,6 +23,7 @@ a { text-decoration: none; }
 #calendar-content ul.table-content li:nth-child(n+29) { border-bottom: none; }
 #calendar-content dl { height: 130px; overflow: hidden; margin: 0; text-align: right; padding: 10px; }
 #calendar-content dl span { font-size: 12px; height: 18px; line-height: 18px; }
+#calendar-content dl span.new-date { float: left; background-color: #4cae4c; color: white; padding: 3px 4px; font-weight: 500; font-size: 12px; }
 #calendar-content dl span.fest { color: #d00; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#calendar-content dl span.lunar { display: block; font-weight: bold; }
+#calendar-content dl span.lunar { display: block; font-weight: 500; font-size: 13px; }
 #calendar-content dl span.day { font-size: 10px; float: right; }
