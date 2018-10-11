@@ -5,22 +5,22 @@
                 亲, <span ref="noon" title="">{{options.noon}}</span>好
             </div>
             <div class="current-time">
-                <span ref="year" title="滚动鼠标滚轮调整年份">{{options.fullyear}}</span> 年
+                <span ref="year" title="滚动鼠标滚轮调整年份">{{options.year}}</span> 年
                 <span ref="month" title="滚动鼠标滚轮调整月份">{{options.month}}</span> 月
             </div>
             <div class="sys-time-btn">
-                <a href="JavasSript:;" class="prev">←</a>
-                <a href="JavasSript:;" class="next">→</a>
-                <a href="JavasSript:;" class="today">今天</a>
-                <a href="javascript:location.reload();" class="refresh">刷新</a>
+                <a href="JavasSript:;" class="prev" @click="_setMonth('-')">←</a>
+                <a href="JavasSript:;" class="next" @click="_setMonth('+')">→</a>
+                <a href="JavasSript:;" class="today" @click="_setMonth">今天</a>
+                <a href="JavasSript:location.reload();" class="refresh">刷新</a>
             </div>
             <ul class="calendar-format">
-                <li :class="options.type == 'week'? 'active':''">列表</li>
-                <li :class="options.type == 'month'? 'active':''">月历</li>
-                <li :class="options.type == 'list'? 'active':''">周历</li>
+                <li @click="_setType('week')" :class="options.type == 'week'? 'active':''">周历</li>
+                <li @click="_setType('month')" :class="options.type == 'month'? 'active':''">月历</li>
+                <li @click="_setType('list')" :class="options.type == 'list'? 'active':''">列表</li>
             </ul>
         </div>
-        <div id="calendar-content">
+        <div id="calendar-content" :class="options.type">
             <ul class="table-header">
                 <template v-for="tabTitle, index in weeks">
                     <li class="work" v-if="index != 5 && index != 6"> <span>周{{tabTitle}}</span> </li>
@@ -30,7 +30,22 @@
             <ul class="table-content">
                 <template v-for="item, index in dataList" v-if="dataList.length > 0">
                     <li>
-                        <calendarView :year="item.year" :month="item.month" :days="item.days"></calendarView>
+                        <calendarView ref="calendar" :year="item.year" :month="item.month" :days="item.days"></calendarView>
+                        <ul class="data-content">
+                            <!-- <li v-for="citem, index in weekLists" v-if="citem.year == item.year && citem.month == item.month && citem.day == item.day"> -->
+                            <li v-for="Citem, Cindex in weekLists">
+                                <template v-if="Citem.day == item.day">
+                                ssss{{Citem.day}}
+                                    
+                                </template>
+                                <!-- {{Citem.year}}
+                                {{Citem.month}} -->
+                                {{typeof(Citem.day)}} {{Citem.day}}
+                                {{typeof(item.day)}}
+                                <!-- <span class="content-name">{{Citem.name}}</span> -->
+                                <!-- <span class="content-name">{{Citem.content}}</span> -->
+                            </li>
+                        </ul>
                     </li>
                 </template>
             </ul>
@@ -48,8 +63,8 @@ export default {
         return {
             options: {
                 noon: '', // forenoon[上午], afternoon[下午]
-                month: new Date().getMonth() + 1, // 获取当前月份(2位)
                 year: new Date().getFullYear(), // 获取当前年份(4位)
+                month: new Date().getMonth() + 1, // 获取当前月份(2位)
                 date: new Date().getDate(), // 获取当前日(1-31)
                 day: new Date().getDay(), // 获取当前星期X(0-6,0代表星期天)
                 time: new Date().getTime(), // 获取当前时间(从1970.1.1开始的毫秒数)
@@ -71,15 +86,21 @@ export default {
             weeks: ['一', '二', '三', '四', '五', '六', '日'],
             // 显示数据
             dataList: [],
+            // 工作日志
+            weekLists: [
+               { year: 2018, month: 10, day: 15, name: "老婆生日:上午看电影", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+               { year: 2018, month: 10, day: 15, name: "老婆生日:下午出去玩", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+               { year: 2018, month: 10, day: 22, name: "外婆生日", content: '去外婆家玩,蹭饭' },
+               { year: 2018, month: 10, day: 23, name: "老爸结婚纪念日", content: '老爸,老妈40年结婚纪念日,亚哈酒店5楼洞庭厅12:00' },
+            ],
         }
     },
     created() {
         this.options.noon = this.options.time.slice(0, 2);
     },
     mounted() {
-        this.$nextTick(function() {
-            this._initData();
-        });
+        this._initData();
+        // this.$nextTick(function() {});
     },
     methods: {
         /**
@@ -96,27 +117,53 @@ export default {
             // let showYear = year + '年';
             // let showMonth = this.months[month - 1] + '月';
             // let showDay = this.days[date - 1] + '日';
+            // console.log(showYear, showMonth, showDay);
             // 计算本月有多少天；
             let days = new Date(year, month, 0).getDate();
             var _temp = []; // 零时数据
             // 构建当月数据
             for (var i = 1; i <= days; i++) {
-                let _data = {
-                    year: year,
-                    month: month,
-                    days: i
-                };
+                let _data = { year: year, month: month, days: i };
                 _temp.push(_data);
             }
             this.dataList = _temp; // 复制, 渲染
-            console.log(this.dataList);
+            // console.log(this.$refs);
+            // console.log(this.dataList);
+            // console.log(this.dataList);
         },
+        _setMonth: function(type) {
+            // this.dataList = [];
+            if (type == '-') {
+                if (this.options.month == 1) {
+                    this.options.year--;
+                    this.options.month = 12;
+                } else {
+                    this.options.month--;
+                }
+            } else if (type == '+') {
+                if (this.options.month == 12) {
+                    this.options.year++;
+                    this.options.month = 1;
+                } else {
+                    this.options.month++;
+                }
+            } else {
+                this.options.year = new Date().getFullYear();
+                this.options.month = new Date().getMonth() + 1;
+                this.options.date = new Date().getDate();
+            }
+            // console.log(this.options.year + '-' + this.options.month);
+            this._initData(this.options.year, this.options.month);
+        },
+        _setType: function(type) {
+            this.options.type = type;
+        }
     }
 }
 
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
 @import 'calendar.css'
 
 </style>
