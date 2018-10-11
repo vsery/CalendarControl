@@ -1,4 +1,4 @@
-# y
+# CalendarControl
 
 > Calendar Control for vue
 
