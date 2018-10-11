@@ -1,6 +1,7 @@
-# CalendarControl
+# CalendarContro
 
 > Calendar Control for vue
+> This is are one Calendar Control
 
 ## Build Setup
 
