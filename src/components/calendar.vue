@@ -31,21 +31,14 @@
                 <template v-for="item, index in dataList" v-if="dataList.length > 0">
                     <li>
                         <calendarView ref="calendar" :year="item.year" :month="item.month" :days="item.days"></calendarView>
-                        <ul class="data-content">
-                            <!-- <li v-for="citem, index in weekLists" v-if="citem.year == item.year && citem.month == item.month && citem.day == item.day"> -->
-                            <li v-for="Citem, Cindex in weekLists">
-                                <template v-if="Citem.day == item.day">
-                                ssss{{Citem.day}}
-                                    
-                                </template>
-                                <!-- {{Citem.year}}
-                                {{Citem.month}} -->
-                                {{typeof(Citem.day)}} {{Citem.day}}
-                                {{typeof(item.day)}}
-                                <!-- <span class="content-name">{{Citem.name}}</span> -->
-                                <!-- <span class="content-name">{{Citem.content}}</span> -->
-                            </li>
-                        </ul>
+                        <div class="data-content-box">
+                            <template v-for="Citem, Cindex in weekLists" v-if="Citem.year == item.year && Citem.month == item.month && Citem.day == item.days">
+                                <div class="data-content" @click="_openJourney(Citem)">
+                                    <span class="content-name">{{Citem.name}}</span>
+                                    <span class="content-body">{{Citem.content}}</span>
+                                </div>
+                            </template>
+                        </div>
                     </li>
                 </template>
             </ul>
@@ -61,6 +54,14 @@ export default {
     },
     data() {
         return {
+            journey: {
+                isShow: false,
+                name: null,
+                content: null,
+                year: null,
+                month: null,
+                day: null,
+            },
             options: {
                 noon: '', // forenoon[上午], afternoon[下午]
                 year: new Date().getFullYear(), // 获取当前年份(4位)
@@ -88,10 +89,70 @@ export default {
             dataList: [],
             // 工作日志
             weekLists: [
-               { year: 2018, month: 10, day: 15, name: "老婆生日:上午看电影", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
-               { year: 2018, month: 10, day: 15, name: "老婆生日:下午出去玩", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
-               { year: 2018, month: 10, day: 22, name: "外婆生日", content: '去外婆家玩,蹭饭' },
-               { year: 2018, month: 10, day: 23, name: "老爸结婚纪念日", content: '老爸,老妈40年结婚纪念日,亚哈酒店5楼洞庭厅12:00' },
+                { year: 2018, month: 8, day: 11, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 11, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 13, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 3, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 15, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 5, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 17, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 15, name: "老婆生日:上午看电影", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 15, name: "老婆生日:下午出去玩", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 8, day: 22, name: "外婆生日", content: '去外婆家玩,蹭饭' },
+                { year: 2018, month: 8, day: 23, name: "老爸结婚纪念日", content: '老爸,老妈40年结婚纪念日,亚哈酒店5楼洞庭厅12:00' },
+
+                { year: 2018, month: 9, day: 21, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 21, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 13, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 13, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 5, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 5, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 15, name: "老婆生日:上午看电影", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 15, name: "老婆生日:下午出去玩", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 9, day: 22, name: "外婆生日", content: '去外婆家玩,蹭饭' },
+                { year: 2018, month: 9, day: 23, name: "老爸结婚纪念日", content: '老爸,老妈40年结婚纪念日,亚哈酒店5楼洞庭厅12:00' },
+
+                { year: 2018, month: 10, day: 1, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 1, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 3, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 3, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 5, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 5, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 15, name: "老婆生日:上午看电影", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 15, name: "老婆生日:下午出去玩", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 22, name: "外婆生日", content: '去外婆家玩,蹭饭' },
+                { year: 2018, month: 10, day: 23, name: "老爸结婚纪念日", content: '老爸,老妈40年结婚纪念日,亚哈酒店5楼洞庭厅12:00' },
+
+                { year: 2018, month: 11, day: 11, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 11, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 3, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 3, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 15, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 15, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 15, name: "老婆生日:上午看电影", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 15, name: "老婆生日:下午出去玩", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 11, day: 22, name: "外婆生日", content: '去外婆家玩,蹭饭' },
+                { year: 2018, month: 11, day: 23, name: "老爸结婚纪念日", content: '老爸,老妈40年结婚纪念日,亚哈酒店5楼洞庭厅12:00' },
+
+                { year: 2018, month: 12, day: 1, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 2, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 3, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 4, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 5, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 6, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 7, name: "美女生日:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 15, name: "老婆生日:上午看电影", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 15, name: "老婆生日:下午出去玩", content: '陪老婆出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 12, day: 22, name: "外婆生日", content: '去外婆家玩,蹭饭' },
+                { year: 2018, month: 12, day: 23, name: "老爸结婚纪念日", content: '老爸,老妈40年结婚纪念日,亚哈酒店5楼洞庭厅12:00' },
             ],
         }
     },
@@ -131,6 +192,7 @@ export default {
             // console.log(this.dataList);
             // console.log(this.dataList);
         },
+        // 切换月份, 今天
         _setMonth: function(type) {
             // this.dataList = [];
             if (type == '-') {
@@ -155,8 +217,19 @@ export default {
             // console.log(this.options.year + '-' + this.options.month);
             this._initData(this.options.year, this.options.month);
         },
+        // 设置展示类型
         _setType: function(type) {
             this.options.type = type;
+        },
+        // 打开行程
+        _openJourney(item){
+            var OBJ = item;
+            OBJ.isShow = true;
+            this.journey = OBJ;
+        },
+        // 关闭行程
+        _closeJourney(){
+            this.journey.isShow = false;
         }
     }
 }

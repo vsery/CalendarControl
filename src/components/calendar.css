@@ -26,15 +26,22 @@ a { text-decoration: none; }
 #calendar-content.week ul.table-content li { height: 400px; }
 #calendar-content.list ul.table-header { display: none; }
 #calendar-content.list ul.table-content li { width: 100%; }
-#calendar-content.month ul.table-content li { height: 200px; }
+#calendar-content.month ul.table-content li { height: 240px; }
 #calendar-content .header { width: 100%; text-align: right; }
 #calendar-content li { display: inline-block; vertical-align: middle; }
 #calendar-content .isToday { float: left; background-color: #00acda; padding: 6px 12px; border: 1px solid #5bc0de; line-height: 1; border-radius: 4px; color: white; font-size: 10px; }
-#calendar-content .Festival { float: left; font-size: 10px; color: #00acda; }
+#calendar-content .Festival { float: left; font-size: 11px; color: #00acda; font-weight: 500; }
 #calendar-content .IMonthCn { float: right; }
 #calendar-content .IDayCn { float: right; color: #333; font-size: 18px; display: inline-block; }
-#calendar-content .second-header { width: 100%; font-size: .5em;  }
+#calendar-content .second-header { width: 100%; font-size: .5em; font-weight: normal; }
 #calendar-content .CDay { float: right; display: inline-block; vertical-align: middle; font-size: 18px; font-weight: bold; }
 #calendar-content .Term { float: right; margin-right: 5px; }
 #calendar-content .header:after,
 #calendar-content .second-header:after { content: ''; clear: both; display: block; }
+#calendar-content .calendarDate { height: 50px; }
+#calendar-content .calendarDate ~ .data-content-box { margin-top: 10px; }
+#calendar-content .data-content-box { display: block; height: 150px; overflow-y: auto; }
+#calendar-content .data-content { display: block; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; }
+#calendar-content .data-content:last-child { margin-bottom: 0; }
+#calendar-content .data-content .content-name { float: left; display: inline-block; vertical-align: middle; color: #333; font-size: 14px; }
+#calendar-content .data-content .content-body { display: block; vertical-align: middle; text-align: left; color: #999; font-size: 11px; text-indent: 2em; white-space: nowrap; overflow: hidden; width: 100%; overflow: hidden; text-overflow: ellipsis; }
