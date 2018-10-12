@@ -1,7 +1,7 @@
 <!--  -->
 <template>
-    <div class="calendarDate" v-if="tempDate != null">
-        <!-- :data-date="JSON.stringify(tempDate)"  -->
+    <div :class="'calendarDate ' + [ tempDate.isCurr ? 'isCurr' : '' ]" v-if="tempDate != null">
+        <!--  :data-date="JSON.stringify(tempDate)" -->
         <div class="header">
             <span class="isToday" v-if="tempDate.isToday">今天</span>
             <span class="Festival" v-else> {{tempDate.Festival}} </span>
@@ -225,20 +225,25 @@ export default {
     props: {
         'year': { type: Number, required: true },
         'month': { type: Number, required: true },
-        'days': { type: Number, required: true }
+        'days': { type: Number, required: true },
+        'curr': { type: Boolean, required: true },
     },
     watch: {
         'year': function(val, old) {
             this.y = val;
-            this.tempDate = this.solarCalendar(this.y, this.m, this.d);
+            this.tempDate = this.solarCalendar(this.y, this.m, this.d, this.c);
         },
         'month': function(val, old) {
             this.m = val;
-            this.tempDate = this.solarCalendar(this.y, this.m, this.d);
+            this.tempDate = this.solarCalendar(this.y, this.m, this.d, this.c);
         },
         'days': function(val, old) {
-            // this.d = val;
-            // this.tempDate = this.solarCalendar(this.y, this.m, this.d);
+            this.d = val;
+            this.tempDate = this.solarCalendar(this.y, this.m, this.d, this.c);
+        },
+        'curr': function(val, old) {
+            this.c = val;
+            this.tempDate = this.solarCalendar(this.y, this.m, this.d, this.c);
         },
     },
     // beforeDestroy(){
@@ -248,7 +253,8 @@ export default {
         this.y = this.year;
         this.m = this.month;
         this.d = this.days;
-        this.tempDate = this.solarCalendar(this.y, this.m, this.d);
+        this.c = this.curr;
+        this.tempDate = this.solarCalendar(this.y, this.m, this.d, this.c);
     },
     methods: {
         /**
@@ -467,7 +473,7 @@ export default {
          * @return JSON object
          * @eg:console.log(this.solarCalendar(1987,11,01));
          */
-        solarCalendar: function(y, m, d) { // 参数区间1900.1.31~2100.12.31
+        solarCalendar: function(y, m, d, isCurr) { // 参数区间1900.1.31~2100.12.31
             if (y < 1900 || y > 2100) { return -1; } // 年份限定、上限
             if (y == 1900 && m == 1 && d < 31) { return -1; } // 下限
             if (!y) { // 未传参 获得当天
@@ -560,6 +566,7 @@ export default {
             var astro = this.toAstro(m, d);
             var festival = this.getFestival(m, d);
             return {
+                'isCurr': isCurr,
                 'LYear': year,
                 'LMonth': month,
                 'LDay': day,

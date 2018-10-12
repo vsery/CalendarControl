@@ -16,7 +16,7 @@ a { text-decoration: none; }
 #calendar-header .calendar-format li.active { background-color: rgba(48, 255, 255, .3); color: white; border-radius: 5px; }
 #calendar-content { }
 #calendar-content ul.table-header { width: 100%; }
-#calendar-content ul.table-header li { float: left; width: 14.28%; font-weight: 500; height: 30px; line-height: 30px; background-color: #ddd; }
+#calendar-content ul.table-header li { float: left; width: 14.28%; font-weight: 500; height: 30px; line-height: 30px; background-color: #ddd; text-align: center; }
 #calendar-content ul.table-header:after,
 #calendar-content ul.table-content:after { content: ''; clear: both; display: block; }
 #calendar-content ul.table-content { width: 100%; border: 1px solid #ddd; box-sizing: border-box; }
@@ -38,7 +38,8 @@ a { text-decoration: none; }
 #calendar-content .Term { float: right; margin-right: 5px; }
 #calendar-content .header:after,
 #calendar-content .second-header:after { content: ''; clear: both; display: block; }
-#calendar-content .calendarDate { height: 50px; }
+#calendar-content .calendarDate { height: 50px; opacity: .3; }
+#calendar-content .calendarDate.isCurr { opacity: 1; }
 #calendar-content .calendarDate ~ .data-content-box { margin-top: 10px; }
 #calendar-content .data-content-box { display: block; height: 150px; overflow-y: auto; }
 #calendar-content .data-content { display: block; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; }

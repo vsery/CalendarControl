@@ -30,7 +30,8 @@
             <ul class="table-content">
                 <template v-for="item, index in dataList" v-if="dataList.length > 0">
                     <li>
-                        <calendarView ref="calendar" :year="item.year" :month="item.month" :days="item.days"></calendarView>
+                        <!-- {{item.year}} {{item.month}} {{item.days}} {{item.isCurr}} -->
+                        <calendarView ref="calendar" :year="item.year" :month="item.month" :days="item.days" :curr="item.isCurr"></calendarView>
                         <div class="data-content-box">
                             <template v-for="Citem, Cindex in weekLists" v-if="Citem.year == item.year && Citem.month == item.month && Citem.day == item.days">
                                 <div class="data-content" @click="_openJourney(Citem)">
@@ -179,18 +180,48 @@ export default {
             // let showMonth = this.months[month - 1] + '月';
             // let showDay = this.days[date - 1] + '日';
             // console.log(showYear, showMonth, showDay);
-            // 计算本月有多少天；
-            let days = new Date(year, month, 0).getDate();
+            let fristdays = new Date(year, month - 1, 0).getDate(); // 计算上月有多少天；
+            let days = new Date(year, month, 0).getDate(); // 计算本月有多少天；
+            let lastdays = new Date(year, month + 1, 0).getDate(); // 计算下月有多少天；
+            let week = new Date(year, month - 1, 0).getDay(); // 本月第一天 周几
+            let lastWeek = new Date(year, month - 1, days).getDay(); // 本月最后一天 周几
+            console.log(lastWeek);
             var _temp = []; // 零时数据
             // 构建当月数据
             for (var i = 1; i <= days; i++) {
-                let _data = { year: year, month: month, days: i };
+                let _data = {
+                    year: year,
+                    month: month,
+                    days: i,
+                    isCurr: true,
+                };
                 _temp.push(_data);
             }
+            // 构建上月数据
+            if (week != 1 && this.options.type == 'month') {
+                for (var i = 0; i < week; i++) {
+                    let _data = {
+                        year: year,
+                        month: month - 1,
+                        days: fristdays - i,
+                        isCurr: false,
+                    };
+                    _temp.unshift(_data);
+                }
+
+            }
+            if (lastWeek != 0 && this.options.type == 'month') {
+                for (var i = 1; i <= 7 - lastWeek; i++) {
+                    let _data = {
+                        year: year,
+                        month: month + 1,
+                        days: i,
+                        isCurr: false,
+                    };
+                    _temp.push(_data);
+                }
+            }
             this.dataList = _temp; // 复制, 渲染
-            // console.log(this.$refs);
-            // console.log(this.dataList);
-            // console.log(this.dataList);
         },
         // 切换月份, 今天
         _setMonth: function(type) {
@@ -222,13 +253,13 @@ export default {
             this.options.type = type;
         },
         // 打开行程
-        _openJourney(item){
+        _openJourney(item) {
             var OBJ = item;
             OBJ.isShow = true;
             this.journey = OBJ;
         },
         // 关闭行程
-        _closeJourney(){
+        _closeJourney() {
             this.journey.isShow = false;
         }
     }

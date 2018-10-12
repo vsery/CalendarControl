@@ -3,6 +3,10 @@
 > Calendar Control for vue
 > This is are one Calendar Control
 
+这只是一个日历面板, 功能正在完善中...
+![Image text](/static/bg.png)
+
+
 ## Build Setup
 
 ``` bash
@@ -20,3 +24,4 @@ npm run build --report
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
