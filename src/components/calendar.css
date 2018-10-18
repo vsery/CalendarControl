@@ -42,7 +42,13 @@ a { text-decoration: none; }
 #calendar-content .calendarDate.isCurr { opacity: 1; }
 #calendar-content .calendarDate ~ .data-content-box { margin-top: 10px; }
 #calendar-content .data-content-box { display: block; height: 150px; overflow-y: auto; }
-#calendar-content .data-content { display: block; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; }
-#calendar-content .data-content:last-child { margin-bottom: 0; }
-#calendar-content .data-content .content-name { float: left; display: inline-block; vertical-align: middle; color: #333; font-size: 14px; }
-#calendar-content .data-content .content-body { display: block; vertical-align: middle; text-align: left; color: #999; font-size: 11px; text-indent: 2em; white-space: nowrap; overflow: hidden; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+#calendar-content .data-content { display: block; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+#calendar-content .data-content { width: 100%; cursor: pointer; }
+#calendar-content .data-content .content-name { float: left; display: inline-block; vertical-align: middle; color: #333; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#calendar-content .data-content .content-body { display: block; vertical-align: middle; text-align: left; color: #999; font-size: 11px; text-indent: 2em; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#calendar-content .data-content-item { display: block; margin-bottom: 10px; }
+#calendar-content .data-content-item:last-child { margin-bottom: 0; }
+#calendar-content .data-content-item .content-del { display: none; transform: all 1s; width: 0; height: 70px; line-height: 20px; padding-top: 15px; box-sizing: border-box; background-color: #48aaaa; color: white; opacity: 1; font-size: 12px; }
+#calendar-content .data-content-item:after { content: ''; clear: both; display: block; }
+#calendar-content .data-content-item:hover .data-content { display: inline-block; float: left; width: 80%; }
+#calendar-content .data-content-item:hover .content-del { display: inline-block; width: 19%; float: right; }

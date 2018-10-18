@@ -13,11 +13,12 @@
                 <a href="JavasSript:;" class="next" @click="_setMonth('+')">→</a>
                 <a href="JavasSript:;" class="today" @click="_setMonth">今天</a>
                 <a href="JavasSript:location.reload();" class="refresh">刷新</a>
+                <a href="JavasSript:" class="add" @click="_addJourney">添加</a>
             </div>
             <ul class="calendar-format">
-                <li @click="_setType('week')" :class="options.type == 'week'? 'active':''">周历</li>
+                <!-- <li @click="_setType('week')" :class="options.type == 'week'? 'active':''">周历</li> -->
                 <li @click="_setType('month')" :class="options.type == 'month'? 'active':''">月历</li>
-                <li @click="_setType('list')" :class="options.type == 'list'? 'active':''">列表</li>
+                <!-- <li @click="_setType('list')" :class="options.type == 'list'? 'active':''">列表</li> -->
             </ul>
         </div>
         <div id="calendar-content" :class="options.type">
@@ -30,13 +31,15 @@
             <ul class="table-content">
                 <template v-for="item, index in dataList" v-if="dataList.length > 0">
                     <li>
-                        <!-- {{item.year}} {{item.month}} {{item.days}} {{item.isCurr}} -->
                         <calendarView ref="calendar" :year="item.year" :month="item.month" :days="item.days" :curr="item.isCurr"></calendarView>
                         <div class="data-content-box">
                             <template v-for="Citem, Cindex in weekLists" v-if="Citem.year == item.year && Citem.month == item.month && Citem.day == item.days">
-                                <div class="data-content" @click="_openJourney(Citem)">
-                                    <span class="content-name">{{Citem.name}}</span>
-                                    <span class="content-body">{{Citem.content}}</span>
+                                <div class="data-content-item">
+                                    <div class="data-content" @click="_openJourney(Citem, Cindex)">
+                                        <span class="content-name">{{Citem.name}}</span>
+                                        <span class="content-body">{{Citem.content}}</span>
+                                    </div>
+                                    <div class="content-del" @click="_delJourney(Cindex)"> 删<br>除 </div>
                                 </div>
                             </template>
                         </div>
@@ -44,25 +47,22 @@
                 </template>
             </ul>
         </div>
+        <calendarConView ref="journeyBox" :journeyData="journey" @close="_closeJourney" @save="_saveJourney" v-if="journeyisShow"></calendarConView>
     </div>
 </template>
 <script>
 import calendarDate from '@/components/calendarDate' // 时间过滤
+import calendarContent from '@/components/calendarContent' // 行程编辑框
 export default {
     name: 'calendar',
     components: {
         'calendarView': calendarDate,
+        'calendarConView': calendarContent,
     },
     data() {
         return {
-            journey: {
-                isShow: false,
-                name: null,
-                content: null,
-                year: null,
-                month: null,
-                day: null,
-            },
+            journey: null,
+            journeyisShow: false,
             options: {
                 noon: '', // forenoon[上午], afternoon[下午]
                 year: new Date().getFullYear(), // 获取当前年份(4位)
@@ -116,6 +116,8 @@ export default {
                 { year: 2018, month: 9, day: 22, name: "外婆生日", content: '去外婆家玩,蹭饭' },
                 { year: 2018, month: 9, day: 23, name: "老爸结婚纪念日", content: '老爸,老妈40年结婚纪念日,亚哈酒店5楼洞庭厅12:00' },
 
+                { year: 2018, month: 10, day: 1, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
+                { year: 2018, month: 10, day: 1, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
                 { year: 2018, month: 10, day: 1, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
                 { year: 2018, month: 10, day: 1, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
                 { year: 2018, month: 10, day: 3, name: "约会:上午看电影", content: '陪美女出去看电影, 喜盈门范城5楼电影院' },
@@ -185,7 +187,7 @@ export default {
             let lastdays = new Date(year, month + 1, 0).getDate(); // 计算下月有多少天；
             let week = new Date(year, month - 1, 0).getDay(); // 本月第一天 周几
             let lastWeek = new Date(year, month - 1, days).getDay(); // 本月最后一天 周几
-            console.log(lastWeek);
+            // console.log(lastWeek);
             var _temp = []; // 零时数据
             // 构建当月数据
             for (var i = 1; i <= days; i++) {
@@ -252,15 +254,41 @@ export default {
         _setType: function(type) {
             this.options.type = type;
         },
+        // 添加行程
+        _addJourney() {
+            this.journeyisShow = true;
+            this.$nextTick(function() {
+                this.$refs.journeyBox._loadDate();
+            });
+        },
         // 打开行程
-        _openJourney(item) {
-            var OBJ = item;
-            OBJ.isShow = true;
-            this.journey = OBJ;
+        _openJourney(item, index) {
+            this.journeyisShow = true;
+            if (this.journey == null) {
+                item.index = index;
+                this.journey = item;
+                this.$nextTick(function() {
+                    this.$refs.journeyBox._loadDate();
+                });
+            }
+        },
+        _delJourney(key){
+            this.weekLists.splice(key, 1);
+        },
+        // 保存行程
+        _saveJourney(res) {
+            if(res.index != null){
+                this.weekLists.splice(res.index, 1, res);                
+            }else{
+                delete res.index;
+                this.weekLists.push(res);
+            }
+            this._closeJourney();
         },
         // 关闭行程
         _closeJourney() {
-            this.journey.isShow = false;
+            this.journey = null;
+            this.journeyisShow = false;
         }
     }
 }
