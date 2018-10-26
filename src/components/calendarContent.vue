@@ -12,7 +12,7 @@
                 <el-form-item label="行程内容">
                     <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}" v-model="conData.content"></el-input>
                 </el-form-item>
-                <el-form-item label-width="0" class="mb">
+                <el-form-item label-width="0" class="tamb">
                     <el-button type="primary" @click="_onSave">保存</el-button>
                     <el-button @click="_onClose">取消</el-button>
                 </el-form-item>
@@ -100,7 +100,8 @@ export default {
 #calendarConBox .el-date-editor {
     width: 100%;
 }
-#calendarConBox .mb{
+#calendarConBox .tamb{
+    text-align: center;
     margin-bottom: 0;
 }
 </style>
