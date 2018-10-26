@@ -12,8 +12,8 @@
                 <el-form-item label="行程内容">
                     <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}" v-model="conData.content"></el-input>
                 </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="_onSave">立即创建</el-button>
+                <el-form-item label-width="0" class="mb">
+                    <el-button type="primary" @click="_onSave">保存</el-button>
                     <el-button @click="_onClose">取消</el-button>
                 </el-form-item>
             </el-form>
@@ -28,12 +28,12 @@ export default {
         return {
             // conData: null,
             conData: {
-                isShow: false,
                 name: null,
                 content: null,
                 year: null,
                 month: null,
                 day: null,
+                isEdit: false
             },
             currDate: new Date(),
         }
@@ -44,7 +44,6 @@ export default {
             default: null
         }
     },
-    created() {},
     mounted() {
         this.$nextTick(function() {});
     },
@@ -53,7 +52,7 @@ export default {
         _loadDate() {
             if (this.journeyData != null) {
                 this.conData = this.journeyData;
-                console.log(this.conData);
+                if(this.conData.isEdit != false) this.conData.isEdit = true;
                 this.currDate = new Date(this.conData.year, this.conData.month -1, this.conData.day);
             }
         },
@@ -101,5 +100,7 @@ export default {
 #calendarConBox .el-date-editor {
     width: 100%;
 }
-
+#calendarConBox .mb{
+    margin-bottom: 0;
+}
 </style>
