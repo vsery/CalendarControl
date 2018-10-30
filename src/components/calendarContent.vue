@@ -3,6 +3,11 @@
     <div id="calendarConBox">
         <div class="box-content">
             <el-form ref="form" :model="conData" label-width="80px" v-if="conData != null">
+                <el-row>
+                    <el-col :span="24">
+                        <div class="box-title"> {{this.conData.isEdit?'编辑行程':'添加行程'}} </div>
+                    </el-col>
+                </el-row>
                 <el-form-item label="行程时间">
                     <el-date-picker v-model="currDate" type="date" placeholder="选择日期"> </el-date-picker>
                 </el-form-item>
@@ -52,8 +57,8 @@ export default {
         _loadDate() {
             if (this.journeyData != null) {
                 this.conData = this.journeyData;
-                if(this.conData.isEdit != false) this.conData.isEdit = true;
-                this.currDate = new Date(this.conData.year, this.conData.month -1, this.conData.day);
+                if (this.conData.isEdit != false) this.conData.isEdit = true;
+                this.currDate = new Date(this.conData.year, this.conData.month - 1, this.conData.day);
             }
         },
         // 提交数据
@@ -72,6 +77,15 @@ export default {
 
 </script>
 <style scoped>
+#calendarConBox .box-title {
+    text-align: content;
+    line-height: 3rem;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #409EFF;
+    margin-bottom: 1rem;
+}
+
 #calendarConBox .box-bg {
     position: fixed;
     left: 0;
@@ -100,8 +114,10 @@ export default {
 #calendarConBox .el-date-editor {
     width: 100%;
 }
-#calendarConBox .tamb{
+
+#calendarConBox .tamb {
     text-align: center;
     margin-bottom: 0;
 }
+
 </style>
