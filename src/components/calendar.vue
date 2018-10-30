@@ -30,18 +30,19 @@
             </ul>
             <ul class="table-content">
                 <template v-for="item, index in dataList" v-if="dataList.length > 0">
-                    <li>
+                    <li @click="_addJourney(index)">
                         <calendarView ref="calendar" :year="item.year" :month="item.month" :days="item.days" :curr="item.isCurr"></calendarView>
+                        <!-- <div class="data-content-box"> -->
                         <template v-if="item.note.length > 0">
                             <div class="data-content-item" v-for="Citem, Cindex in item.note">
-                                <div class="data-content" @click="_openJourney(Citem)">
+                                <div class="data-content" @click.stop="_openJourney(Citem)">
                                     <span class="content-name">{{Citem.name}}</span>
                                     <span class="content-body">{{Citem.content}}</span>
                                 </div>
-                                <div class="content-del" @click="_delJourney(index, Cindex)"> 删<br>除 </div>
+                                <div class="content-del" @click.stop="_delJourney(index, Cindex)"> 删<br>除 </div>
                             </div>
                         </template>
-                        <div class="data-content-box" @click="_addJourney(index)" v-else> 无 </div>
+                        <!-- </div> -->
                     </li>
                 </template>
             </ul>
@@ -314,7 +315,7 @@ export default {
                 }
             }
             this._closeJourney();
-            // this._saveData();
+            this._saveData();
         },
         // 关闭行程
         _closeJourney() {
@@ -333,7 +334,7 @@ export default {
     },
     // 离开页面时,保存数据
     beforeDestroy() {
-        this._saveData();
+        // this._saveData();
     }
 }
 
